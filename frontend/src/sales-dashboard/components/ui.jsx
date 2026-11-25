@@ -70,3 +70,27 @@ export function SyncLine({ meta }) {
     </span>
   );
 }
+
+// Tooltip used by every chart: a small, readable card instead of recharts' default box.
+export function ChartTip({ active, payload, label, labelFmt = (l) => l, valueFmt = (v) => v, nameFmt = (n) => n }) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="sd-tip">
+      <div className="sd-tip-head">{labelFmt(label)}</div>
+      {payload.filter((p) => p.value !== undefined && p.value !== null).map((p) => (
+        <div className="sd-tip-row" key={p.dataKey + String(p.name)}>
+          <i style={{ background: p.color || p.fill || p.stroke }} />
+          <span>{nameFmt(p.name)}</span>
+          <b>{valueFmt(p.value, p)}</b>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Colour-coded collection % (Amount Received ÷ Program Fee)
+export function CollectPill({ value }) {
+  if (value === null || value === undefined) return <span className="sd-muted">—</span>;
+  const tone = value >= 80 ? 'sd-good' : value >= 50 ? 'sd-warn' : 'sd-bad';
+  return <span className={`sd-pill ${tone}`}>{Number(value).toLocaleString('en-IN', { maximumFractionDigits: 1 })}%</span>;
+}

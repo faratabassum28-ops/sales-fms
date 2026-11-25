@@ -4,7 +4,7 @@ import {
 } from 'recharts';
 import { useApi } from '../api.js';
 import { useFilters } from '../FilterContext.jsx';
-import { Card, NewBadge, Status, Switch } from '../components/ui.jsx';
+import { Card, ChartTip, NewBadge, Status, Switch } from '../components/ui.jsx';
 import {
   colorFor, fmtMetric, fmtPeriod, int, lakh, lakhShort, pct,
 } from '../format.js';
@@ -37,6 +37,7 @@ export default function Team() {
   const { data, loading, error } = useApi('/team', {
     from: filters.from, to: filters.to, programs: filters.programs, closers: filters.closers, granularity: gran,
   });
+  const maxFee = Math.max(1, ...(data?.leaderboard || []).map((r) => r.programFee));
   const metricSwitch = <Switch options={MET} value={metric} onChange={setMetric} />;
 
   return (
@@ -65,10 +66,10 @@ export default function Team() {
                   <tbody>
                     {data.leaderboard.map((r) => (
                       <tr key={r.closedBy}>
-                        <td>{r.rank}</td>
-                        <td><span className="sd-dot" style={{ background: colorFor(r.closedBy, data.closers) }} />{r.closedBy}</td>
+                        <td><span className={`sd-rank sd-rank-${r.rank <= 3 ? r.rank : 'n'}`}>{r.rank}</span></td>
+                        <td className="sd-strong"><span className="sd-dot" style={{ background: colorFor(r.closedBy, data.closers) }} />{r.closedBy}</td>
                         <td className="sd-r">{int(r.enrollments)}</td>
-                        <td className="sd-r">{lakh(r.programFee)}</td>
+                        <td className="sd-r sd-bar-cell" style={{ '--w': `${(r.programFee / maxFee) * 100}%` }}><span>{lakh(r.programFee)}</span></td>
                         <td className="sd-r">{lakh(r.amountReceived)}</td>
                         <td className="sd-r">{lakh(r.amountDue)}</td>
                         <td className="sd-r">{lakh(r.avgProgramFee)}</td>
@@ -90,12 +91,12 @@ export default function Team() {
               <ResponsiveContainer width="100%" height={340}>
                 <LineChart data={data.trend[metric]} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="key" tickFormatter={(k) => fmtPeriod(k, gran)} minTickGap={32} />
-                  <YAxis tickFormatter={(v) => (metric === 'enrollments' ? int(v) : lakhShort(v))} width={56} />
-                  <Tooltip labelFormatter={(k) => fmtPeriod(k, gran)} formatter={(v, name) => [fmtMetric(metric, v), name]} />
-                  <Legend />
+                  <XAxis dataKey="key" tickFormatter={(k) => fmtPeriod(k, gran)} minTickGap={32} tickLine={false} axisLine={false} />
+                  <YAxis tickFormatter={(v) => (metric === 'enrollments' ? int(v) : lakhShort(v))} width={58} tickLine={false} axisLine={false} />
+                  <Tooltip cursor={{ stroke: 'var(--line-strong)' }} content={<ChartTip labelFmt={(k) => fmtPeriod(k, gran)} valueFmt={(v) => fmtMetric(metric, v)} />} />
+                  <Legend iconType="circle" wrapperStyle={{ paddingTop: 12 }} />
                   {data.closers.map((c) => (
-                    <Line isAnimationActive={false} key={c} type="monotone" dataKey={c} stroke={colorFor(c, data.closers)} strokeWidth={2} dot={false}
+                    <Line isAnimationActive={false} key={c} type="monotone" dataKey={c} stroke={colorFor(c, data.closers)} strokeWidth={2.5} dot={false} activeDot={{ r: 5 }}
                       strokeDasharray={c === 'Not Tagged' ? '5 4' : undefined} />
                   ))}
                 </LineChart>

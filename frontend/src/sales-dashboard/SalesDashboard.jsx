@@ -50,13 +50,13 @@ function Inner() {
         )}
       />
 
-      <nav className="sd-tabs" aria-label="Sales dashboard pages">
+      <div className="sd-tabs" role="tablist" aria-label="Sales dashboard pages">
         {TABS.map(([to, label, end], i) => (
           <NavLink key={to} to={"/revenue" + (to ? "/" + to : "")} end={!!end} className={({ isActive }) => "sd-tab" + (isActive ? " sd-tab-on" : "")}>
             <span className="sd-num">{i + 1}</span>{label}
           </NavLink>
         ))}
-      </nav>
+      </div>
 
       {metaError && <div className="sd-notice sd-error">Cannot reach the dashboard API: {metaError.message}</div>}
       {meta && meta.rowCount === 0 && (

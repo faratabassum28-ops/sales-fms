@@ -3,7 +3,7 @@ import {
 } from 'recharts';
 import { useApi } from '../api.js';
 import { useFilters } from '../FilterContext.jsx';
-import { Card, Status } from '../components/ui.jsx';
+import { Card, ChartTip, Status } from '../components/ui.jsx';
 import Heatmap from '../components/Heatmap.jsx';
 import {
   MONTH_NAMES, fmtDate, fmtMonth, int, lakh, lakhShort, PALETTE, weekday,
@@ -51,10 +51,10 @@ export default function BestPeriods() {
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={data.dayOfWeek} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="day" tickFormatter={(d) => d.slice(0, 3)} />
-                    <YAxis tickFormatter={lakhShort} width={56} />
-                    <Tooltip formatter={(v, _n, p) => [`${lakh(v)} · ${int(p.payload.enrollments)} enrollments`, 'Program Fee']} />
-                    <Bar isAnimationActive={false} dataKey="programFee" fill={PALETTE[2]} radius={[3, 3, 0, 0]} />
+                    <XAxis dataKey="day" tickFormatter={(d) => d.slice(0, 3)} tickLine={false} axisLine={false} />
+                    <YAxis tickFormatter={lakhShort} width={58} tickLine={false} axisLine={false} />
+                    <Tooltip cursor={{ fill: 'var(--accent-light)' }} content={<ChartTip nameFmt={() => 'Program Fee'} valueFmt={(v, p) => `${lakh(v)} · ${int(p.payload.enrollments)} enrollments`} />} />
+                    <Bar isAnimationActive={false} dataKey="programFee" fill={PALETTE[0]} radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -65,12 +65,12 @@ export default function BestPeriods() {
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={data.yoy.programFee} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="month" tickFormatter={(m) => MONTH_NAMES[m - 1]} />
-                    <YAxis tickFormatter={lakhShort} width={56} />
-                    <Tooltip labelFormatter={(m) => MONTH_NAMES[m - 1]} formatter={(v, name) => [lakh(v), name]} />
-                    <Legend />
+                    <XAxis dataKey="month" tickFormatter={(m) => MONTH_NAMES[m - 1]} tickLine={false} axisLine={false} />
+                    <YAxis tickFormatter={lakhShort} width={58} tickLine={false} axisLine={false} />
+                    <Tooltip cursor={{ fill: 'var(--accent-light)' }} content={<ChartTip labelFmt={(m) => MONTH_NAMES[m - 1]} valueFmt={(v) => lakh(v)} />} />
+                    <Legend iconType="circle" wrapperStyle={{ paddingTop: 12 }} />
                     {data.yoy.years.map((y, i) => (
-                      <Bar isAnimationActive={false} key={y} dataKey={String(y)} name={String(y)} fill={PALETTE[i % PALETTE.length]} radius={[2, 2, 0, 0]} />
+                      <Bar isAnimationActive={false} key={y} dataKey={String(y)} name={String(y)} fill={PALETTE[i % PALETTE.length]} radius={[4, 4, 0, 0]} />
                     ))}
                   </BarChart>
                 </ResponsiveContainer>

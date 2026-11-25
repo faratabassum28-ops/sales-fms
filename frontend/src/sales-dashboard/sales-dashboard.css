@@ -1,18 +1,19 @@
 /* Sales Dashboard — every selector lives under .sd and every class starts with sd-, so it cannot leak into (or be
    changed by) the rest of Sales FMS. Colours come from the Sales FMS tokens, so light/dark mode just works. */
-.sd { --card: var(--panel); --bg: var(--panel-alt); --new: #0ea5e9; }
+.sd { --card: var(--panel); --bg: var(--panel-alt); --new: #0ea5e9; font-size: 14.5px; }
 .sd .sd-sync { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
-.sd .sd-muted { color: var(--muted); font-size: 12.5px; margin: 0; }
+.sd .sd-muted { color: var(--muted); font-size: 13px; margin: 0; }
 .sd .sd-note { margin: 8px 2px 16px; }
 
-/* tabs */
-.sd .sd-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
-.sd .sd-tab { display: inline-flex; align-items: center; gap: 9px; padding: 9px 16px; border-radius: 999px; font-size: 13.5px; font-weight: 600; color: var(--ink); text-decoration: none; background: var(--panel); border: 1px solid var(--line); transition: all .14s ease; }
-.sd .sd-tab:hover { border-color: var(--accent); color: var(--accent-dark); }
-.sd .sd-tab-on, .sd .sd-tab-on:hover { background: linear-gradient(135deg, #14b8a6, #0d9488); border-color: transparent; color: #fff; box-shadow: 0 6px 16px -6px rgba(13, 148, 136, .6); }
+/* tabs: one compact segmented row */
+.sd .sd-tabs { display: flex; flex-direction: row; flex-wrap: nowrap; gap: 4px; padding: 5px; margin: 0 0 16px; width: fit-content; max-width: 100%; overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow-panel); scrollbar-width: none; }
+.sd .sd-tabs::-webkit-scrollbar { display: none; }
+.sd .sd-tab { display: inline-flex; align-items: center; gap: 9px; flex: 0 0 auto; padding: 10px 18px; border-radius: 12px; font-size: 14px; font-weight: 650; white-space: nowrap; color: var(--muted); text-decoration: none; background: transparent; border: 0; transition: background .14s ease, color .14s ease; }
+.sd .sd-tab:hover { background: var(--accent-light); color: var(--accent-dark); }
+.sd .sd-tab-on, .sd .sd-tab-on:hover { background: linear-gradient(135deg, #14b8a6, #0d9488); color: #fff; box-shadow: 0 6px 16px -6px rgba(13, 148, 136, .6); }
 :root[data-theme="dark"] .sd .sd-tab-on { color: #04201c; }
-.sd .sd-num { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; font-size: 11px; font-weight: 800; background: var(--accent-light); color: var(--accent-dark); }
-.sd .sd-tab-on .sd-num { background: rgba(255, 255, 255, .22); color: inherit; }
+.sd .sd-num { display: grid; place-items: center; width: 21px; height: 21px; border-radius: 50%; font-size: 11px; font-weight: 800; background: var(--accent-light); color: var(--accent-dark); }
+.sd .sd-tab-on .sd-num { background: rgba(255, 255, 255, .25); color: inherit; }
 
 /* filter bar */
 .sd .sd-filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 16px; position: relative; z-index: 5; box-shadow: var(--shadow-panel); }
@@ -91,3 +92,63 @@
 .sd .sd-notice.sd-error { border-left-color: var(--bad); }
 .sd .sd-fading { opacity: .6; transition: opacity .15s; }
 .sd code { background: var(--line); padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+
+/* ================= period cards (Overview) ================= */
+.sd .sd-period { display: flex; flex-direction: column; gap: 4px; padding: 18px 20px 16px; }
+.sd .sd-period::before { content: ""; position: absolute; left: 20px; top: 0; width: 34px; height: 3px; border-radius: 0 0 4px 4px; background: var(--accent); }
+.sd .sd-period header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.sd .sd-period h3 { font-size: 13px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+.sd .sd-period header .sd-muted { margin-top: 2px; font-size: 12px; }
+.sd .sd-period-big { margin-top: 10px; font-family: var(--display); font-size: 34px; font-weight: 800; letter-spacing: -.035em; line-height: 1.1; font-variant-numeric: tabular-nums; display: flex; flex-direction: column; }
+.sd .sd-period-big small { margin-top: 2px; font-family: inherit; font-size: 12px; font-weight: 600; letter-spacing: 0; color: var(--muted); }
+.sd .sd-meter { height: 8px; margin-top: 12px; border-radius: 999px; background: var(--line); overflow: hidden; }
+.sd .sd-meter i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #10b981, #34d399); transition: width .5s cubic-bezier(.2, .8, .2, 1); }
+.sd .sd-meter-label { margin: 5px 0 0; font-size: 12px; font-weight: 650; color: var(--good); }
+.sd .sd-mini { display: grid; grid-template-columns: auto 1fr 1fr; gap: 8px 18px; margin: 12px 0 0; padding-top: 12px; border-top: 1px solid var(--line); }
+.sd .sd-mini > div { display: flex; flex-direction: column; gap: 3px; min-width: 0; align-items: flex-start; }
+.sd .sd-mini dt { font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.sd .sd-mini dd { margin: 0; font-family: var(--display); font-size: 15px; font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sd .sd-mini .sd-growth { font-size: 11px; padding: 1px 6px; }
+
+/* payments at a glance */
+.sd .sd-status { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.sd .sd-status-item { display: flex; flex-direction: column; gap: 3px; padding: 14px 16px; border-radius: 14px; background: var(--panel-alt); border: 1px solid var(--line); border-left: 4px solid var(--line-strong); }
+.sd .sd-status-item strong { font-family: var(--display); font-size: 26px; font-weight: 800; letter-spacing: -.03em; }
+.sd .sd-status-name { font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.sd .sd-s-good { border-left-color: var(--good); } .sd .sd-s-good strong { color: var(--good); }
+.sd .sd-s-warn { border-left-color: var(--gold); } .sd .sd-s-warn strong { color: var(--warn); }
+.sd .sd-s-accent { border-left-color: var(--accent); } .sd .sd-s-accent strong { color: var(--accent); }
+
+/* chart tooltip */
+.sd-tip { min-width: 170px; padding: 10px 12px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line-strong); box-shadow: 0 18px 40px -12px rgba(0, 0, 0, .45); font-size: 13px; color: var(--ink); }
+.sd-tip-head { margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid var(--line); font-weight: 750; }
+.sd-tip-row { display: flex; align-items: center; gap: 8px; padding: 2px 0; }
+.sd-tip-row i { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }
+.sd-tip-row span { flex: 1; color: var(--muted); }
+.sd-tip-row b { font-variant-numeric: tabular-nums; }
+
+/* tables: easier to scan */
+.sd .sd-tbl { font-size: 14px; }
+.sd .sd-tbl th:first-child, .sd .sd-tbl td:first-child { position: sticky; left: 0; z-index: 1; background: var(--panel); }
+.sd .sd-tbl thead th:first-child { background: var(--panel-alt); z-index: 2; }
+.sd .sd-tbl tbody tr:hover td:first-child { background: var(--accent-light); }
+.sd .sd-tbl tfoot td:first-child { background: var(--panel-alt); }
+.sd .sd-bar-cell { background: linear-gradient(90deg, rgba(13, 148, 136, .20) var(--w, 0%), transparent var(--w, 0%)); }
+.sd .sd-bar-cell span { font-weight: 700; }
+.sd .sd-pill { display: inline-block; min-width: 54px; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 800; text-align: center; }
+.sd .sd-pill.sd-good { color: var(--good); background: var(--good-bg); }
+.sd .sd-pill.sd-warn { color: var(--warn); background: var(--warn-bg); }
+.sd .sd-pill.sd-bad { color: var(--bad); background: var(--bad-bg); }
+.sd .sd-rank { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; font-size: 12px; font-weight: 800; background: var(--panel-alt); border: 1px solid var(--line); color: var(--muted); }
+.sd .sd-rank-1 { background: linear-gradient(135deg, #fde68a, #f59e0b); color: #5b3a00; border-color: transparent; }
+.sd .sd-rank-2 { background: linear-gradient(135deg, #e2e8f0, #94a3b8); color: #1e293b; border-color: transparent; }
+.sd .sd-rank-3 { background: linear-gradient(135deg, #fdba74, #c2410c); color: #fff; border-color: transparent; }
+
+/* filters: calmer, grouped */
+.sd .sd-filters { gap: 16px 22px; padding: 14px 18px; }
+.sd .sd-presets { align-self: flex-end; }
+.sd .sd-callout .sd-big { font-size: 32px; }
+.sd .sd-card h3 { font-size: 16px; }
+.sd .sd-card-head .sd-muted { margin-top: 2px; }
+.sd .recharts-legend-item-text { color: var(--ink) !important; font-size: 13px; }
+@media (max-width: 760px) { .sd .sd-period-big { font-size: 30px; } .sd .sd-mini dd { font-size: 14px; } .sd .sd-tab { padding: 9px 14px; font-size: 13px; } }
