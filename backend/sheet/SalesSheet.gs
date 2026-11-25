@@ -57,13 +57,15 @@ function doGet(e) {
   catch (err) { return json_({ ok: false, error: String(err.message || err) }); }
 }
 
-// the website says: "write Interest Level / Profession / City / Call Status for these phone numbers"
+// the website says either "delete the rows of these phone numbers" (leads deleted on the website)
+// or: "write Interest Level / Profession / City / Call Status for these phone numbers"
 function doPost(e) {
   var lock = LockService.getScriptLock();
   try {
     var body = JSON.parse(e.postData.contents);
     check_(body.token);
     lock.waitLock(20000);
+    if (body.deletes) return json_(Object.assign({ ok: true }, deleteRows_(body.deletes)));
     return json_(Object.assign({ ok: true }, writeBack_(body.updates || [])));
   } catch (err) { return json_({ ok: false, error: String(err.message || err) }); }
   finally { try { lock.releaseLock(); } catch (x) {} }
@@ -163,6 +165,24 @@ function writeBack_(updates) {
   });
   SpreadsheetApp.flush();
   return { updated: Object.keys(found).length, missing: Object.keys(wanted).filter(function (p) { return !found[p]; }) };
+}
+
+// Removes every lead row whose phone number (last 10 digits) is in the list — used when leads are deleted on the website,
+// so the next sync does not bring them back.
+function deleteRows_(phones) {
+  var gone = {}, deleted = 0;
+  phones.forEach(function (p) { var k = last10_(p); if (k) gone[k] = true; });
+  leadTabs_().forEach(function (t) {
+    var sh = t.sheet, last = sh.getLastRow();
+    if (last <= t.hi + 1) return;
+    var phoneCol = findCol_(t.head, /phone/), n = last - t.hi - 1;
+    var vals = sh.getRange(t.hi + 2, phoneCol + 1, n, 1).getValues();
+    for (var i = n - 1; i >= 0; i--) {                       // bottom-up so row numbers stay valid
+      if (gone[last10_(vals[i][0])]) { sh.deleteRow(t.hi + 2 + i); deleted++; }
+    }
+  });
+  SpreadsheetApp.flush();
+  return { deleted: deleted };
 }
 
 /* ------------------------------------------------------ one-time set-up */

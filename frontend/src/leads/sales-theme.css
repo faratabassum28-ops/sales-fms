@@ -198,6 +198,15 @@ h2 { font-family: var(--display); font-size: 16px; font-weight: 700; letter-spac
 .pf-card { border-radius: var(--radius); box-shadow: var(--shadow-panel); border-top-width: 3px; }
 .pf-big { font-family: var(--display); font-weight: 800; letter-spacing: -0.03em; }
 
+/* delete selected leads */
+.ld-btn-danger, .ld-btn-danger:hover:not(:disabled) { color: #fff; border-color: transparent; background: linear-gradient(135deg, #ef4444, #dc2626); box-shadow: 0 6px 16px -6px rgba(220, 38, 38, 0.6); }
+.ld-btn-danger:hover:not(:disabled) { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+.ld-bulk { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 14px; margin: 0 0 12px; border-radius: 14px; background: var(--accent-light); border: 1px solid rgba(13, 148, 136, 0.3); }
+.ld-del { max-width: 440px; }
+.ld-del h3 { margin: 0 0 6px; font-family: var(--display); }
+.ld-del-check { display: flex; gap: 10px; align-items: flex-start; margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: var(--panel-alt); border: 1px solid var(--line); cursor: pointer; }
+.ld-del-check input { margin-top: 3px; }
+
 /* ---------------------------------------------------------------- Daily Board */
 .bd-hero { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: 28px; padding: 26px 30px; margin-bottom: 18px; border-radius: 22px; color: #eafffb;
   background: radial-gradient(520px 260px at 90% 0, rgba(45, 212, 191, 0.38), transparent 70%), radial-gradient(420px 260px at 0 110%, rgba(99, 102, 241, 0.35), transparent 70%), linear-gradient(135deg, #0f2a36, #0a1b24);

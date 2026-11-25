@@ -12,6 +12,7 @@ export default function LeadList() {
   const { lqLeads: leads, loaded, cfg, callers, now, admin, setModal, load, toast, inWs, openLead, workshops, regOf } = useLeads();
   const [q, setQ] = useState(""), [flt, setFlt] = useState("all"), [doer, setDoer] = useState("all");
   const [sel, setSel] = useState({}), [to, setTo] = useState(""), [add, setAdd] = useState(null), [lim, setLim] = useState(200);
+  const [del, setDel] = useState(null); // delete dialog: { sheet: bool, busy: bool }
 
   const needle = q.trim().toLowerCase();
   const rows = useMemo(
@@ -27,6 +28,17 @@ export default function LeadList() {
   const assign = async () => {
     try { await api.ldBulkAssign(ids, to); setSel({}); await load(); toast(`Assigned ${ids.length} lead${ids.length === 1 ? "" : "s"} to ${to}`, "good"); }
     catch (e) { toast(e.message, "bad"); }
+  };
+  const doDelete = async () => {
+    setDel((d) => ({ ...d, busy: true }));
+    try {
+      const r = await api.ldBulkDelete(ids, del.sheet);
+      setSel({}); setDel(null); await load();
+      const sh = r.sheet || {};
+      toast(`Deleted ${r.count} lead${r.count === 1 ? "" : "s"}${sh.removed ? ` and ${sh.removed} sheet row${sh.removed === 1 ? "" : "s"}` : ""}`, "good");
+      if (sh.error) toast("Leads deleted, but the sheet rows could not be removed: " + sh.error, "bad");
+      else if (sh.skipped) toast(`${sh.skipped} phone number${sh.skipped === 1 ? " is" : "s are"} used by another registration, so its sheet row was kept`, "good");
+    } catch (e) { setDel(null); toast(e.message, "bad"); }
   };
   const saveLead = async () => {
     try { await api.ldAddLead(add); setAdd(null); await load(); toast("Lead added", "good"); }
@@ -45,12 +57,29 @@ export default function LeadList() {
           <select value={flt} onChange={(e) => setFlt(e.target.value)}><option value="all">All follow-ups</option><option value="over">Has overdue</option><option value="wait">Has upcoming</option><option value="done">Has done</option></select>
         </div>
       </div>
+      {del && (
+        <div className="modal-scrim" onMouseDown={(e) => { if (e.target === e.currentTarget && !del.busy) setDel(null); }}>
+          <div className="modal ld-del" role="dialog" aria-modal="true" aria-label="Delete leads">
+            <h3>Delete {ids.length} lead{ids.length === 1 ? "" : "s"}?</h3>
+            <p className="ld-small">Their follow-ups and call history are deleted too. This cannot be undone.</p>
+            <label className="ld-del-check">
+              <input type="checkbox" checked={del.sheet} onChange={(e) => setDel({ ...del, sheet: e.target.checked })} />
+              <span><b>Also remove them from the Google Sheet</b><br /><span className="ld-small">Recommended. A row left in the sheet would be imported again at the next sync.</span></span>
+            </label>
+            <div className="ld-actions" style={{ justifyContent: "flex-end", marginTop: 16 }}>
+              <button type="button" className="ld-btn" disabled={del.busy} onClick={() => setDel(null)}>Cancel</button>
+              <button type="button" className="ld-btn ld-btn-danger" disabled={del.busy} onClick={doDelete}>{del.busy ? "Deleting…" : `Delete ${ids.length}`}</button>
+            </div>
+          </div>
+        </div>
+      )}
       <WorkshopBar items={leads} />
       {ids.length > 0 && (
         <div className="ld-bulk"><b>{ids.length} selected</b>
           <select value={to} onChange={(e) => setTo(e.target.value)}><option value="">Assign to…</option>{callers.map((c) => <option key={c}>{c}</option>)}</select>
           <button type="button" className="ld-btn ld-btn-solid" disabled={!to} onClick={assign}>Assign</button>
-          <button type="button" className="ld-btn" onClick={() => setSel({})}>Clear</button></div>
+          <button type="button" className="ld-btn" onClick={() => setSel({})}>Clear</button>
+          <button type="button" className="ld-btn ld-btn-danger" onClick={() => setDel({ sheet: true, busy: false })}>🗑 Delete {ids.length}</button></div>
       )}
       <div className="table-wrap">
         <table className="table ld-sheet">

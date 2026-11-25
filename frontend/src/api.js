@@ -105,6 +105,7 @@ export const api = {
   ldSaveConfig: (data) => request("/config", { method: "PUT", body: JSON.stringify(data) }),
   ldLeads: () => request("/leads"),
   ldAddLead: (data) => request("/leads", { method: "POST", body: JSON.stringify(data) }),
+  ldBulkDelete: (ids, alsoSheet = true) => request("/leads/bulk-delete", { method: "POST", body: JSON.stringify({ ids, alsoSheet }) }),
   ldBulkAssign: (ids, assignedTo) => request("/leads/bulk-assign", { method: "POST", body: JSON.stringify({ ids, assignedTo }) }),
   ldPatchLead: (id, data) => request(`/leads/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
   ldSaveFollowUp: (id, n, data) => request(`/leads/${id}/fu/${n}`, { method: "PATCH", body: JSON.stringify(data) }),

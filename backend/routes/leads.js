@@ -138,6 +138,33 @@ router.post("/leads", adminOnly, wrap(async (req, res) => {
   res.json(S.plain(lead));
 }));
 
+// Delete the selected leads (admin). Test entries, wrong numbers, duplicates…  Their call history goes with them.
+// A lead whose row is still in the Google Sheet would simply be imported again, so — unless the admin unticks it —
+// the matching sheet rows are removed too (only for phone numbers that no remaining lead uses).
+router.post("/leads/bulk-delete", adminOnly, wrap(async (req, res) => {
+  const ids = [...new Set((req.body?.ids || []).map(String))].filter((i) => mongoose.isValidObjectId(i));
+  if (!ids.length) throw fail("Select at least one lead");
+  if (ids.length > 2000) throw fail("Select at most 2000 leads at a time");
+  const doomed = await Lead.find({ _id: { $in: ids } }).select("phone10 name key").lean();
+  if (!doomed.length) throw fail("Those leads no longer exist");
+  await Lead.deleteMany({ _id: { $in: ids } });
+  await LeadActivity.deleteMany({ key: { $in: doomed.map((l) => l.key).filter(Boolean) } }); // their call history (and report counts) go too
+
+  let sheet = { removed: 0, skipped: 0, error: null };
+  const cfg = await S.getCfg();
+  if (req.body?.alsoSheet !== false && cfg.sheetUrl && cfg.sheetToken) {
+    const phones = [...new Set(doomed.map((l) => l.phone10).filter(Boolean))];
+    const stillUsed = new Set((await Lead.find({ phone10: { $in: phones } }).select("phone10").lean()).map((l) => l.phone10));
+    const free = phones.filter((p) => !stillUsed.has(p));
+    sheet.skipped = phones.length - free.length; // another registration of the same person is still in the app
+    if (free.length) {
+      try { const r = await S.scriptCall(cfg, { deletes: free }); sheet.removed = r.deleted || 0; }
+      catch (e) { sheet.error = e.message; }
+    }
+  }
+  res.json({ ok: 1, count: doomed.length, sheet });
+}));
+
 router.post("/leads/bulk-assign", adminOnly, wrap(async (req, res) => {
   const ids = (req.body?.ids || []).filter((i) => mongoose.isValidObjectId(i));
   if (!ids.length) throw fail("Select at least one lead");
