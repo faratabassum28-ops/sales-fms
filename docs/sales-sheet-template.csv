@@ -1,2 +1,2 @@
-Timestamp,Lead Name,Lead Email,Lead Phone,Assigned To,Campaign,Lead Source,Company,Remarks,Interest Level,Profession,City,Call Status
-,Sample Lead,sample@example.com,9999999999,,Spring Offer,Instagram,Sample Co.,Delete this row before going live,,,,
+Timestamp,Lead Name,Lead Email,Lead Phone,Assigned To,Workshop Date,Workshop Name,WhatsApp Link,Interest Level,Profession,City,Call Status
+,Sample Lead (delete this row),sample@example.com,9999999999,,25/12/2026,Sample Workshop,https://wa.me/919999999999,,,,

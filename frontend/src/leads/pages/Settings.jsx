@@ -65,8 +65,8 @@ function Form({ cfg, load, sync, toast, leads, workshops }) {
 
       <Panel title="📥 Sales sheet → FU1">
         <p className="ld-small" style={{ marginTop: 0 }}>
-          <b>The sales team types:</b> Lead Name · Lead Email · Lead Phone · Assigned To · <b>Campaign</b> · Lead Source · Company · Remarks (Timestamp fills itself).
-          Every row goes straight to <b>FU1</b>. A new campaign name gets its own filter on every page automatically.<br />
+          <b>The sales team types:</b> Lead Name · Lead Email · Lead Phone · Assigned To · <b>Workshop Date</b> · <b>Workshop Name</b> · <b>WhatsApp Link</b> (Timestamp fills itself).
+          Every row goes straight to <b>FU1</b>. A new workshop name gets its own filter on every page automatically.<br />
           <b>The website fills back</b> on the same row: Interest Level · Profession · City · Call Status — as soon as a caller updates the lead.
         </p>
         <div className="ld-steps">

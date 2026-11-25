@@ -56,12 +56,12 @@ export default function Dashboard() {
             <tbody>{Object.entries(by).map(([k, v]) => <tr key={k}><td><b>{k}</b></td><td>{v.n}</td><td>{v.done}</td>{admin && <td className={v.over ? "ld-bad" : ""}>{v.over}</td>}<td>{v.conn}</td></tr>)}</tbody>
           </table></div>
         </Panel>
-        <Panel title="Campaign analysis">
+        <Panel title="Workshop analysis">
           <div className="table-wrap ld-flush"><table className="table">
-            <thead><tr><th>Campaign</th><th>Leads</th><th>Contacted</th><th>Connected</th><th>Connect %</th></tr></thead>
+            <thead><tr><th>Workshop</th><th>Leads</th><th>Contacted</th><th>Connected</th><th>Connect %</th></tr></thead>
             <tbody>{wsRows.map((w) => <tr key={w.k}><td><b>{w.k}</b></td><td>{w.n}</td><td>{w.c}</td><td>{w.conn}</td><td>{pc(w.conn, w.n)}</td></tr>)}</tbody>
           </table></div>
-          {!wsRows.length && <Empty>No campaign names yet — type them in the sheet's Campaign column.</Empty>}
+          {!wsRows.length && <Empty>No workshop names yet — type them in the sheet's Workshop column.</Empty>}
         </Panel>
         <Panel title="Call outcomes">
           {Object.entries(st).sort((a, b) => b[1] - a[1]).map(([k, v]) => <Bar key={k} label={k} v={v} max={done} tone="good" />)}

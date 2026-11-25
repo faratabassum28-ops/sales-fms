@@ -3,15 +3,15 @@
  * ------------------------------------------------------------------
  * THE SHEET HAS ONE TAB CALLED "Leads". The sales team types ONLY these columns:
  *
- *     Timestamp | Lead Name | Lead Email | Lead Phone | Assigned To | Campaign | Lead Source | Company | Remarks
+ *     Timestamp | Lead Name | Lead Email | Lead Phone | Assigned To | Workshop Date | Workshop Name | WhatsApp Link
  *     (Timestamp fills itself the moment a phone number is typed.)
  *
  * The website fills these columns BACK on the same row after a caller updates the lead (grey, don't type):
  *     Interest Level | Profession | City | Call Status
  *
  * Every new row goes straight to FU1 on the assigned caller's "Today Follow-ups". There are no Day 1 / Day 2 stages.
- *   - Campaign: the product / ad / batch the lead belongs to. Type a NEW name and the website shows a filter for it.
- *   - Lead Source, Company, Remarks: for your team's reference in the sheet (the website does not import them).
+ *   - Workshop Date (dd/mm/yyyy) and Workshop Name: which workshop the lead is for. Type a NEW workshop name and the website shows a filter for it.
+ *   - WhatsApp Link: the lead's WhatsApp chat / group link — it powers the green WhatsApp button on the lead.
  *   - Assigned To: pick a name from the dropdown (names come from the "_Team" tab). Leave blank = shared out automatically.
  *
  * SETUP (once, about 3 minutes)
@@ -35,17 +35,17 @@ var TIME_ZONE  = "Asia/Kolkata";
 
 var LEADS_TAB = "Leads";
 var TEAM_TAB  = "_Team";
-var TYPED_HEADERS   = ["Timestamp", "Lead Name", "Lead Email", "Lead Phone", "Assigned To", "Campaign", "Lead Source", "Company", "Remarks"];
+var TYPED_HEADERS   = ["Timestamp", "Lead Name", "Lead Email", "Lead Phone", "Assigned To", "Workshop Date", "Workshop Name", "WhatsApp Link"];
 var WEBSITE_HEADERS = ["Interest Level", "Profession", "City", "Call Status"];   // filled by the website
 var INTEREST_OPTIONS = ["Hot", "Warm", "Cold", "N/A"];
 
 // what the website receives: [name it expects, how to recognise the header in this sheet]
 var COLUMNS = [
-  ["Timestamp", /timestamp/], ["Lead Name", /^(?!.*(campaign|source|company)).*name/], ["Lead Email", /email/], ["Lead Phone", /phone/],
-  ["UTW Date", /^\b$/],                                             // not used in sales: always empty
+  ["Timestamp", /timestamp/], ["Lead Name", /lead.*name|^name$/], ["Lead Email", /email/], ["Lead Phone", /phone/],
+  ["UTW Date", /workshop.*date|^date$/],                            // the website calls this the Workshop Date
   ["Assigned To", /assigned/],
-  ["Workshop Name", /campaign/],                                    // the website calls it Campaign on screen
-  ["WhatsApp Link", /^\b$/],
+  ["Workshop Name", /workshop.*name/],
+  ["WhatsApp Link", /whatsapp|link/],
   ["Level", /interest|level/], ["Profession", /profession/], ["City", /city/],
   ["Msg Sent", /^\b$/], ["Call Status", /call.*status/]
 ];
@@ -186,13 +186,14 @@ function setupSalesSheet() {
   sh.getRange(1, 1, 1, TYPED_HEADERS.length).setBackground("#0f766e");                       // typed by the team
   sh.getRange(1, TYPED_HEADERS.length + 1, 1, WEBSITE_HEADERS.length).setBackground("#64748b");   // filled by the website
   sh.setRowHeight(1, 34); sh.setFrozenRows(1); sh.setFrozenColumns(2);
-  var widths = [150, 170, 210, 140, 140, 150, 130, 160, 220, 120, 150, 120, 130];
+  var widths = [150, 170, 210, 140, 140, 130, 190, 280, 120, 150, 120, 130];
   widths.forEach(function (w, i) { sh.setColumnWidth(i + 1, w); });
   if (sh.getMaxRows() < 500) sh.insertRowsAfter(sh.getMaxRows(), 500 - sh.getMaxRows());
 
   var rows = sh.getMaxRows() - 1;
   sh.getRange(2, 1, rows, 1).setNumberFormat("dd/MM/yyyy HH:mm:ss");
   sh.getRange(2, 4, rows, 1).setNumberFormat("@");                                           // phone numbers stay text
+  sh.getRange(2, 6, rows, 1).setNumberFormat("dd/MM/yyyy");                                  // Workshop Date
   var asg = SpreadsheetApp.newDataValidation().requireValueInRange(team.getRange("A2:A"), true).setAllowInvalid(true).build();
   sh.getRange(2, 5, rows, 1).setDataValidation(asg);
   var lvl = SpreadsheetApp.newDataValidation().requireValueInList(INTEREST_OPTIONS, true).setAllowInvalid(true).build();
@@ -209,7 +210,7 @@ function setupSalesSheet() {
 
   // one example row so the team sees the format (delete it before going live)
   if (sh.getRange(2, 2).getValue() === "") {
-    sh.getRange(2, 2, 1, 8).setValues([["Sample Lead", "sample@example.com", "9999999999", "", "Spring Offer", "Instagram", "Sample Co.", "Delete this row before going live"]]);
+    sh.getRange(2, 2, 1, 7).setValues([["Sample Lead (delete this row)", "sample@example.com", "9999999999", "", "25/12/2026", "Sample Workshop", "https://wa.me/919999999999"]]);
     stampAll_();
   }
   SpreadsheetApp.getUi().alert("Sales sheet is ready ✅\n\nNext:\n1. Type your callers' names in the _Team tab (column A).\n2. Run setupInstantSync.\n3. Deploy → New deployment → Web app (Execute as Me, Anyone).\n4. Paste the Web app URL in the website: Settings → Sales sheet.");

@@ -7,6 +7,13 @@ marking, Razorpay payments or booking imports in the UI any more.
 **Sidebar** — Admin: Daily Board · Team Performance · Reports · Today Follow-ups · Delayed Follow-ups · Sales · Team · Settings.
 Caller: Today Follow-ups · Delayed Follow-ups · Sales · My Reports.
 
+**Sales Dashboard (revenue)** — admin-only page at `/revenue` (sidebar → *Sales Dashboard*): Sales Overview, Program Performance,
+Best Periods, Closer Performance. It reads the Students Records → *Dashboard* tab, cleans it (blocklist, test entries, duplicates),
+stores it in the same MongoDB (`sd_enrollments`) and refreshes daily at 06:00 IST or with **Refresh now**. Backend: `backend/salesDashboard/`,
+frontend: `frontend/src/sales-dashboard/`. Settings are the `SD_*` variables in `backend/.env.example`. Give the server access with a Google
+service-account JSON in `SD_GOOGLE_SERVICE_ACCOUNT_JSON` (share the sheet with its e-mail as Viewer), or share the sheet as "Anyone with the link".
+Set `SD_DATA_SOURCE=sample` to preview with fake data. After pulling these changes run `npm install` in **both** `backend/` and `frontend/`.
+
 **Flow** — sheet row → (a few seconds) → lead created, auto-assigned if *Assigned To* is blank → FU1 due now →
 caller taps Call / WhatsApp → Update status → FU2, FU3… follow on the schedule from Settings.
 
@@ -17,9 +24,8 @@ panels, tables, follow-up columns, Daily Board, login). Change `--accent` / `--s
 Create a *new blank* Google Sheet → Extensions → Apps Script → paste it (Settings → **Copy Apps Script** fills the secret key and
 site address for you) → run `setupSalesSheet` (builds the **Leads** and **_Team** tabs with headers, dropdowns and colours) →
 run `setupInstantSync` → Deploy as Web app → paste the URL in Settings → Test connection.
-Columns typed by the team: Timestamp (automatic) · Lead Name · Lead Email · Lead Phone · Assigned To · **Campaign** · Lead Source · Company · Remarks.
+Columns typed by the team: Timestamp (automatic) · Lead Name · Lead Email · Lead Phone · Assigned To · **Workshop Date** · **Workshop Name** · **WhatsApp Link**.
 Filled back by the website: Interest Level (Hot/Warm/Cold) · Profession · City · Call Status.
-Lead Source, Company and Remarks stay in the sheet for the team (the website does not import them).
 `docs/sales-sheet-template.csv` has the same headers if you prefer to import a file.
 
 The backend API is unchanged and still contains the old attendee/payment endpoints; they are simply unused (no UI calls them).

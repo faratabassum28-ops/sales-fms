@@ -23,6 +23,7 @@ const LeadList = lazyRetry(() => import("./pages/LeadList.jsx"));
 const Activity = lazyRetry(() => import("./pages/Activity.jsx"));
 const Performance = lazyRetry(() => import("./pages/Performance.jsx"));
 const Team = lazyRetry(() => import("./pages/Team.jsx"));
+const SalesDashboard = lazyRetry(() => import("../sales-dashboard/SalesDashboard.jsx"));
 const Settings = lazyRetry(() => import("./pages/Settings.jsx"));
 const Account = lazyRetry(() => import("../pages/Account.jsx"));
 
@@ -80,6 +81,7 @@ function Shell() {
     ...(admin ? [{ to: "/board", label: "Daily Board", icon: "board" }] : []),
     ...(admin ? [{ to: "/performance", label: "Team Performance", icon: "perf" }] : []),
     ...(admin ? [{ to: "/reports", label: "Reports", icon: "reports" }] : []),
+    ...(admin ? [{ to: "/revenue", label: "Sales Dashboard", icon: "dashboard" }] : []),
     { to: "/tasks", label: "Today Follow-ups", icon: "tasks", badge: todayCount },
     { to: "/followups", label: "Delayed Follow-ups", icon: "followups", badge: followCount, tone: "bad" },
     { section: "Pipeline" },
@@ -170,6 +172,7 @@ function Shell() {
               <Route index element={<Navigate to={home} replace />} />
               <Route path="board" element={guard(<Board />)} />
               <Route path="performance" element={guard(<Performance />)} />
+              <Route path="revenue/*" element={guard(<SalesDashboard />)} />
               <Route path="reports" element={<Reports />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="tasks" element={<Tasks />} />

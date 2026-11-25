@@ -56,7 +56,7 @@ function TaskCard({ x, cb, calm, delayed, now, cfg, openLead, setModal }) {
           </div>
           <span className="ld-soft">{tag}</span>
         </div>
-        {l.workshop && <div className="ld-tags"><span className="ld-ws" title="Campaign">{l.workshop}</span></div>}
+        {l.workshop && <div className="ld-tags"><span className="ld-ws" title="Workshop">{l.workshop}</span></div>}
         {cb && f.note && <div className="ld-note">“{f.note}”</div>}
         {!cb && last && <div className="ld-last ld-clip" title={last}>{last}</div>}
         <div className="ld-actions ld-actions-3">{call}{chat}{upd}</div>
@@ -69,7 +69,7 @@ function TaskCard({ x, cb, calm, delayed, now, cfg, openLead, setModal }) {
       <div className="ld-nameline">{nameBtn}<a className="ld-phone" href={"tel:" + l.phone}>{l.phone}</a></div>
       <div className="ld-tags">
         <Pill s={tone}>{cb ? "Callback " + fmt(f.callbackAt) : `${step} · ${s === "over" ? "overdue " + delay(f, now) : "due " + fmt(f.planned)}`}</Pill>
-        {l.workshop && <span className="ld-ws" title="Campaign">{l.workshop}</span>}
+        {l.workshop && <span className="ld-ws" title="Workshop">{l.workshop}</span>}
         <span className={"ld-who-tag" + (owner === "Unassigned" ? " none" : "")} title="Assigned to"><UserIco />{owner}</span>
       </div>
       {(detail || (cb && f.note)) && <div className="ld-small ld-clip">{detail}{cb && f.note ? (detail ? " · " : "") + "📝 " + f.note : ""}</div>}
@@ -182,7 +182,7 @@ export default function Tasks({ view = "today", day: dayProp = 0 }) {
       {!!poolAll.length && (
         <>
           <div className="toolbar ld-tbar">
-            <SearchInput value={q} onChange={setQ} placeholder={admin ? "Search name, phone, city, campaign… (press /)" : "Search name, city or campaign… (press /)"} />
+            <SearchInput value={q} onChange={setQ} placeholder={admin ? "Search name, phone, city, workshop… (press /)" : "Search name, city or workshop… (press /)"} />
             <div className="filter-row">
               {admin && (
                 <select value={caller} onChange={(e) => setCaller(e.target.value)} aria-label="Caller">

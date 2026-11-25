@@ -36,10 +36,10 @@ export default function LeadList() {
     <div className="page">
       <PageHeader title="Sales" subtitle="Every lead from the sales sheet, with each follow-up step and its outcome"
         meta={<div className="ld-actions"><span className="chip"><strong>{rows.length}</strong> leads</span>
-          <button type="button" className="ld-btn" onClick={() => downloadCsv("leads.csv", [["Lead", ...(admin ? ["Phone"] : []), "Caller", "Campaign", "City", ...steps.map((n) => "FU" + n)], ...rows.map((l) => [l.name, ...(admin ? [l.phone] : []), l.assignedTo, l.workshop, l.city, ...steps.map((n) => l.fus[n - 1]?.status || "")])])}>⬇ CSV</button>
+          <button type="button" className="ld-btn" onClick={() => downloadCsv("leads.csv", [["Lead", ...(admin ? ["Phone"] : []), "Caller", "Workshop", "City", ...steps.map((n) => "FU" + n)], ...rows.map((l) => [l.name, ...(admin ? [l.phone] : []), l.assignedTo, l.workshop, l.city, ...steps.map((n) => l.fus[n - 1]?.status || "")])])}>⬇ CSV</button>
           {admin && <button type="button" className="ld-btn ld-btn-solid" onClick={() => setAdd({})}>＋ Add lead</button>}</div>} />
       <div className="toolbar">
-        <SearchInput value={q} onChange={setQ} placeholder={admin ? "Search name, phone, city, campaign…" : "Search name, city or campaign…"} />
+        <SearchInput value={q} onChange={setQ} placeholder={admin ? "Search name, phone, city, workshop…" : "Search name, city or workshop…"} />
         <div className="filter-row">
           {admin && <select value={doer} onChange={(e) => setDoer(e.target.value)}><option value="all">All callers</option><option value="none">Unassigned</option>{callers.map((d) => <option key={d}>{d}</option>)}</select>}
           <select value={flt} onChange={(e) => setFlt(e.target.value)}><option value="all">All follow-ups</option><option value="over">Has overdue</option><option value="wait">Has upcoming</option><option value="done">Has done</option></select>
@@ -58,7 +58,7 @@ export default function LeadList() {
             <tr><th colSpan={admin ? 15 : 12} className="g0">Lead Qualification</th>{steps.map((n) => <th key={n} colSpan={5} className={gc(n)}>Follow-Up {n}{cfg?.plan?.[n - 1] ? ` · planned ${cfg.plan[n - 1].time}` : ""}</th>)}</tr>
             <tr>
               {admin && <th><input type="checkbox" aria-label="Select all shown" onChange={(e) => setSel(e.target.checked ? Object.fromEntries(rows.slice(0, lim).map((l) => [l._id, 1])) : {})} /></th>}
-              {["Timestamp", "Lead Name", ...(admin ? ["Phone", "Email"] : []), "Assigned To", "Campaign", "Current Status", "Level", "Profession", "City"].map((h) => <th key={h}>{h}</th>)}
+              {["Timestamp", "Lead Name", ...(admin ? ["Phone", "Email"] : []), "Assigned To", "Workshop", "Workshop Date", "Current Status", "Level", "Profession", "City"].map((h) => <th key={h}>{h}</th>)}
               {steps.flatMap((n) => ["Planned", "Actual", "Status", "Action", "Delay"].map((h) => <th key={n + h} className={gc(n)}>{h}</th>))}
             </tr>
           </thead>
@@ -71,6 +71,7 @@ export default function LeadList() {
                   <td>{fmt(l.ts)}</td><td><button type="button" className="ld-namebtn" onClick={() => openLead(l)} title="See this lead's history"><b>{l.name}</b></button>{regOf(l).of > 1 && <span className="ld-reg" title="This person registered more than once — each registration is its own row">#{regOf(l).n} of {regOf(l).of}</span>}</td>{admin && <><td>{l.phone}</td><td>{l.email}</td></>}
                   <td>{l.assignedTo || <span className="ld-pill ld-pill-over">Unassigned</span>}</td>
                   <td>{l.workshop ? <span className="ld-ws">{l.workshop}</span> : "—"}</td>
+                  <td>{l.utwDate || "—"}</td>
                   <td>{cur}</td><td>{l.level}</td><td>{l.profession}</td><td>{l.city}</td>
                   {steps.map((n) => {
                     const i = n - 1, f = l.fus[i];

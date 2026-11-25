@@ -68,7 +68,7 @@ export default function LeadDrawer({ lead: l, cfg, admin, callers, now, workshop
         {reg.of > 1 && (
           <div className="ld-regs">
             <b>Registration #{reg.n} of {reg.of}</b> — this person registered again. Other registrations:
-            {reg.others.map((o) => <button key={o._id} type="button" className="ld-chip" onClick={() => openLead(o)}>{o.workshop || "No campaign"} · {fmt(o.ts)}</button>)}
+            {reg.others.map((o) => <button key={o._id} type="button" className="ld-chip" onClick={() => openLead(o)}>{o.workshop || "No workshop"} · {fmt(o.ts)}</button>)}
           </div>
         )}
         <p className="ld-small ld-dr-meta">Came in {l.ts ? when(l.ts) : "—"}{l.source === "manual" ? " · added manually" : " · Google Sheet"}</p>
@@ -103,14 +103,14 @@ export default function LeadDrawer({ lead: l, cfg, admin, callers, now, workshop
           </div>
         )}
 
-        <div className="ld-dr-sec">Campaign</div>
+        <div className="ld-dr-sec">Workshop</div>
         {admin ? (
           <div className="ld-actions">
             <input className="ld-input" style={{ maxWidth: 260 }} list="ld-ws-list" value={ws} onChange={(e) => setWs(e.target.value)} placeholder="Workshop name" />
             <datalist id="ld-ws-list">{workshops.map((w) => <option key={w.name} value={w.name} />)}</datalist>
             <button type="button" className="ld-btn" disabled={ws.trim() === (l.workshop || "")} onClick={() => onUpdate({ workshop: ws })}>Save</button>
           </div>
-        ) : <div className="ld-dl">{row("Campaign", l.workshop) || <span className="ld-small">Not set</span>}</div>}
+        ) : <div className="ld-dl">{row("Workshop", l.workshop) || <span className="ld-small">Not set</span>}</div>}
 
         <div className="ld-dr-sec">History</div>
         <div className="ld-timeline">

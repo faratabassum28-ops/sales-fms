@@ -97,8 +97,8 @@ router.post("/sheet-test", adminOnly, wrap(async (req, res) => {
   const cfg = { ...(await S.getCfg()), ...(req.body || {}) };
   const rows = await S.readSheetRows(cfg), hi = rows.findIndex((r) => r.some((c) => /phone/i.test(String(c))));
   if (hi < 0) throw fail("Connected, but no header row with “Lead Phone” was found in the first tab");
-  const H = rows[hi].map((h) => String(h).trim()), need = ["Timestamp", "Lead Name", "Lead Email", "Lead Phone", "Assigned To", "Campaign"];
-  const missing = need.filter((n) => !H.some((h) => h.toLowerCase().includes(n === "Campaign" ? "workshop" : n.toLowerCase().replace("lead ", ""))));
+  const H = rows[hi].map((h) => String(h).trim()), need = ["Timestamp", "Lead Name", "Lead Email", "Lead Phone", "Assigned To", "Workshop Name", "WhatsApp Link"];
+  const missing = need.filter((n) => !H.some((h) => h.toLowerCase().includes(n.toLowerCase().replace("lead ", ""))));
   res.json({ ok: true, leadsInSheet: rows.slice(hi + 1).filter((r) => String(r.find((_, i) => /phone/i.test(H[i] || "")) ?? "").trim()).length, headers: H.filter(Boolean), missing });
 }));
 

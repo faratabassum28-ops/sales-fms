@@ -78,7 +78,20 @@ async function request(path, options = {}) {
   return res.json();
 }
 
+// Sales Dashboard (revenue) — admin only. Array filters travel as "a|b|c".
+function sdQuery(params = {}) {
+  const qs = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) {
+    if (v === undefined || v === null || v === "" || (Array.isArray(v) && !v.length)) continue;
+    qs.set(k, Array.isArray(v) ? v.join("|") : v);
+  }
+  return qs.toString() ? "?" + qs : "";
+}
+
 export const api = {
+  // ---- sales dashboard (revenue) ----
+  sd: (path, params) => request("/sales-dashboard" + path + sdQuery(params)),
+  sdSync: () => request("/sales-dashboard/sync", { method: "POST" }),
   // ---- auth ----
   login: (email, password) => request("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),
   me: () => request("/auth/me"),

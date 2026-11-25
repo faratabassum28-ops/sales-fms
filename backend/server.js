@@ -10,6 +10,8 @@ import intakeRoutes from "./routes/intake.js";
 import { requireAuth } from "./middleware/auth.js";
 import { startJobs } from "./utils/leadService.js";
 import { startSheetJobs } from "./utils/sheetSync.js";
+import salesDashboardRoutes from "./salesDashboard/router.js";
+import { startSalesDashboard } from "./salesDashboard/sync.js";
 
 const app = express();
 
@@ -28,6 +30,8 @@ app.use("/api/auth", authRoutes);
 // PUBLIC, but protected by Razorpay's signature + a secret in the URL (see routes/intake.js). Must stay above requireAuth.
 app.use("/api/intake", intakeRoutes);
 // Everything else needs a signed-in user. Admin-only routes are guarded inside the router.
+// Revenue dashboard (admins only; the router checks the role). Must stay above the catch-all below.
+app.use("/api/sales-dashboard", requireAuth, salesDashboardRoutes);
 app.use("/api", requireAuth, leadRoutes);
 
 // Free-tier hosts (Render) put the server to sleep after ~15 minutes with no traffic; the first
@@ -51,6 +55,7 @@ mongoose
     startKeepAlive();
     startJobs();
     startSheetJobs();
+    startSalesDashboard();
   })
   .catch((err) => {
     console.error("MongoDB connection error:", err.message);

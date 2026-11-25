@@ -9,14 +9,17 @@
     "seed:admin": "node seed-admin.js",
     "test": "node test/integrations.test.mjs",
     "test:flow": "node test/flow.test.mjs",
-    "close:connected": "node close-connected.js"
+    "close:connected": "node close-connected.js",
+    "test:dashboard": "node --test salesDashboard/test/analytics.test.js salesDashboard/test/clean.test.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "compression": "^1.8.2",
     "cors": "^2.8.5",
+    "csv-parse": "^5.6.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "google-auth-library": "^9.15.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.5.0",
     "node-cron": "^3.0.3"

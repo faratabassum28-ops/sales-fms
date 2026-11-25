@@ -14,12 +14,12 @@ export default function WorkshopBar({ items }) {
     <button key={v || "all"} type="button" className={"ld-chip" + (workshop === v ? " on" : "")} onClick={() => setWorkshop(v)}>{label} <span className="ld-chip-n">{n}</span></button>
   );
   return (
-    <div className="ld-wsbar" role="group" aria-label="Filter by campaign">
-      <span className="ld-small">Campaign</span>
+    <div className="ld-wsbar" role="group" aria-label="Filter by workshop">
+      <span className="ld-small">Workshop</span>
       <div className="ld-wsbar-scroll">
         {chip("", "All", list.length)}
         {workshops.map((w) => chip(w.name, w.name, cnt.get(w.name) || 0))}
-        {none > 0 && chip(NO_WS, "No campaign", none)}
+        {none > 0 && chip(NO_WS, "No workshop", none)}
       </div>
     </div>
   );
