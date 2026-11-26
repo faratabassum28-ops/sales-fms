@@ -131,6 +131,7 @@ export const api = {
   ldCallers: () => request("/callers"),
   ldClearDelayed: () => request("/clear-delayed", { method: "POST" }),
   ldProgress: () => request("/progress"),
+  ldAssignments: (from, to) => request(`/assignments?from=${from || ""}&to=${to || ""}`),
   ldPerformance: (from, to) => request(`/performance?from=${from}&to=${to}`),
   ldHistory: (id) => request(`/leads/${id}/history`),
   ldShare: () => request("/share"),

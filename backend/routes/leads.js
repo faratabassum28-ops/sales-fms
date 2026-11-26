@@ -1,6 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import User from "../models/User.js";
+import { getState as getSalesState } from "../salesDashboard/store.js";
 import { Lead, LeadActivity, LeadBooking, LeadPayment, LeadSnapshot } from "../models/Lead.js";
 import { hashPassword } from "../utils/auth.js";
 import { clearAuthCache } from "../middleware/auth.js";
@@ -141,6 +142,25 @@ router.post("/leads", adminOnly, wrap(async (req, res) => {
 // Delete the selected leads (admin). Test entries, wrong numbers, duplicates…  Their call history goes with them.
 // A lead whose row is still in the Google Sheet would simply be imported again, so — unless the admin unticks it —
 // the matching sheet rows are removed too (only for phone numbers that no remaining lead uses).
+// Assignment tracker (admin). Joins in the revenue each person closed (Sales Dashboard "Closed By") when the names match.
+router.get("/assignments", adminOnly, wrap(async (req, res) => {
+  const d = await S.assignments(String(req.query.from || ""), String(req.query.to || ""));
+  const rows = getSalesState().rows.filter((r) => r.date >= d.from && r.date <= d.to);
+  const by = new Map();
+  for (const r of rows) {
+    if (r.notTagged || !r.closedBy) continue;
+    const k = r.closedBy.trim().toLowerCase(), x = by.get(k) || { enrollments: 0, programFee: 0, amountReceived: 0 };
+    x.enrollments++; x.programFee += r.programFee || 0; x.amountReceived += r.amountReceived || 0; by.set(k, x);
+  }
+  let matched = 0;
+  for (const r of d.rows) {
+    const k = r.name.toLowerCase(), first = k.split(/\s+/)[0];
+    const hit = by.get(k) || [...by.entries()].find(([c]) => c === first || c.split(/\s+/)[0] === first)?.[1] || null;
+    r.closed = hit; if (hit) matched++;
+  }
+  res.json({ ...d, revenueMatched: matched });
+}));
+
 router.post("/leads/bulk-delete", adminOnly, wrap(async (req, res) => {
   const ids = [...new Set((req.body?.ids || []).map(String))].filter((i) => mongoose.isValidObjectId(i));
   if (!ids.length) throw fail("Select at least one lead");

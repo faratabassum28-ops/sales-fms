@@ -931,3 +931,72 @@ export async function shareTick() {
   } catch (e) { console.error("[leads] daily share failed:", e.message); }
   finally { shareBusy = false; }
 }
+
+// ---------------------------------------------------------------------------
+// Assignment tracker (admin): how many leads each person was given, how far each one has got, and how those leads turned out.
+// Stage counts and call numbers cover EVERY lead currently owned by the person; "inRange" counts leads assigned in the period.
+// ---------------------------------------------------------------------------
+export async function assignments(fromYmd, toYmd) {
+  const ok = (v) => /^\d{4}-\d{2}-\d{2}$/.test(v || "");
+  const today = dateKey(new Date());
+  if (!ok(toYmd)) toYmd = today;
+  if (!ok(fromYmd)) fromYmd = toYmd;
+  if (toYmd < fromYmd) [fromYmd, toYmd] = [toYmd, fromYmd];
+  const from = dayStart(fromYmd), to = endOfDay(dayStart(toYmd)), now = new Date();
+  const users = await User.find({ active: { $ne: false } }).lean();
+  const leads = await Lead.find({}, "assignedTo assignedAt assignedBy ts createdAt fus level").lean();
+
+  const blank = (name, admin = false) => ({
+    name, admin, total: 0, inRange: 0, today: 0, untouched: 0, noAnswer: 0, callback: 0, notInterested: 0, badNumber: 0, connected: 0,
+    hot: 0, warm: 0, cold: 0, overdue: 0, stale: 0, firstCallMs: 0, firstCalls: 0, byAdmin: 0, byAuto: 0, bySheet: 0, spark: [],
+  });
+  const people = new Map();
+  for (const u of users) { const n = leadCallerName(u); if (n) people.set(n.toLowerCase(), blank(n, u.role === "admin")); }
+  const un = blank("Unassigned");
+  const team = blank("Team");
+
+  // last 14 days (ending at the "to" day) for the assignment trend
+  const days = Array.from({ length: 14 }, (_, i) => dateKey(new Date(+dayStart(toYmd) - (13 - i) * 864e5)));
+  const dayIdx = new Map(days.map((d, i) => [d, i]));
+  const daily = days.map((date) => ({ date, assigned: 0 }));
+
+  for (const l of leads) {
+    const owner = (l.assignedTo || "").trim();
+    let b = un;
+    if (owner) { b = people.get(owner.toLowerCase()); if (!b) { b = blank(owner); people.set(owner.toLowerCase(), b); } }
+    const at = new Date(l.assignedAt || l.ts || l.createdAt || now);
+    const fus = l.fus || [], done = fus.filter((f) => f.actual);
+    const st = new Set(done.map((f) => f.status));
+    const stage = !done.length ? "untouched" : st.has("Connected") ? "connected" : st.has("Not interested") ? "notInterested"
+      : ["Invalid", "Wrong number", "Out of service"].some((x) => st.has(x)) ? "badNumber"
+      : ["Callback", "Call Later"].some((x) => st.has(x)) ? "callback" : "noAnswer";
+    const next = fus.find((f) => !f.actual && !f.skipped && f.planned);
+    for (const x of owner ? [b, team] : [b]) {
+      x.total++; x[stage]++;
+      if (/hot/i.test(l.level || "")) x.hot++; else if (/warm/i.test(l.level || "")) x.warm++; else if (/cold/i.test(l.level || "")) x.cold++;
+      if (next && new Date(next.planned) < now) x.overdue++;
+      if (!done.length && now - at > 864e5) x.stale++;
+      if (done.length) {
+        const first = Math.min(...done.map((f) => +new Date(f.actual)));
+        if (first >= +at) { x.firstCallMs += first - +at; x.firstCalls++; }
+      }
+      if (at >= from && at <= to) x.inRange++;
+      if (dateKey(at) === today) x.today++;
+      if (l.assignedBy === "auto") x.byAuto++; else if (l.assignedBy === "sheet") x.bySheet++; else if (owner) x.byAdmin++;
+    }
+    if (owner && dayIdx.has(dateKey(at))) { daily[dayIdx.get(dateKey(at))].assigned++; }
+    if (owner) { const i = dayIdx.get(dateKey(at)); if (i !== undefined) { (b.spark = b.spark.length ? b.spark : Array(14).fill(0))[i]++; } }
+  }
+  const fin = (x) => {
+    const contacted = x.total - x.untouched;
+    return {
+      ...x, contacted,
+      contactPct: x.total ? Math.round((contacted / x.total) * 100) : null,
+      connectPct: contacted ? Math.round((x.connected / contacted) * 100) : null,
+      avgFirstCallH: x.firstCalls ? Math.round((x.firstCallMs / x.firstCalls / 36e5) * 10) / 10 : null,
+      health: !x.total ? "idle" : x.overdue || x.stale ? "attention" : "good",
+    };
+  };
+  const rows = [...people.values()].map(fin).sort((a, b) => b.inRange - a.inRange || b.total - a.total || a.name.localeCompare(b.name));
+  return { from: fromYmd, to: toYmd, today, at: now, rows, team: fin(team), unassigned: fin(un), daily };
+}
